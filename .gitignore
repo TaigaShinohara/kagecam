@@ -1,0 +1,26 @@
+# ローカル環境（SDKパスなど。公開しない）
+local.properties
+
+# ビルド成果物
+build/
+app/build/
+.gradle/
+.kotlin/
+*.apk
+*.aab
+
+# ログ
+*.log
+
+# 署名鍵・秘密情報（絶対に公開しない）
+*.jks
+*.keystore
+*.pem
+*.key
+.env
+.env.*
+.local/
+
+# IDE
+.idea/
+*.iml
