@@ -24,3 +24,6 @@ app/build/
 # IDE
 .idea/
 *.iml
+
+# Robolectric用 android-all（VM内でcurl取得した大容量jar。公開しない）
+.robolectric-deps/

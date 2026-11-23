@@ -89,7 +89,7 @@ import java.util.Locale
 private const val MAX_DIM = 1080
 
 /** 編集画面の初期値。新規は怖さの初期値、再編集では保存済みパラメータを復元する。 */
-private data class EditorInitial(
+internal data class EditorInitial(
     val threshold: Int? = null,
     val preset: ScaryPreset = ScaryPreset.YUREI,
     val ghost: Float = 0.4f,
@@ -97,23 +97,38 @@ private data class EditorInitial(
     val noise: Float = 0.3f,
 )
 
+/**
+ * アプリ共通のテーマ（夜の世界）。スクリーンショットテストからも同じものを
+ * 使うため MainActivity の外に出してある。
+ * onPrimary は骨の白を指定する：血の赤を primary に差し替えただけだと、
+ * 主要ボタンの文字に M3 暗色テーマ既定の暗い紫が乗り、読めなくなる
+ * （2026-11-23 のスクリーンショット検証で発見・修正）。
+ */
+@Composable
+internal fun KageCamTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = darkColorScheme(
+            primary = Palette.Blood,
+            onPrimary = Palette.Bone,
+            background = Palette.Night,
+            surface = Palette.NightCard,
+            onBackground = Palette.Bone,
+            onSurface = Palette.Bone,
+        ),
+    ) {
+        Surface(modifier = Modifier.fillMaxSize(), color = Palette.Night) {
+            content()
+        }
+    }
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme(
-                colorScheme = darkColorScheme(
-                    primary = Palette.Blood,
-                    background = Palette.Night,
-                    surface = Palette.NightCard,
-                    onBackground = Palette.Bone,
-                    onSurface = Palette.Bone,
-                ),
-            ) {
-                Surface(modifier = Modifier.fillMaxSize(), color = Palette.Night) {
-                    KageCamApp()
-                }
+            KageCamTheme {
+                KageCamApp()
             }
         }
     }
@@ -338,7 +353,7 @@ private fun KageCamApp() {
 // ---------- 棚（ホーム） ----------
 
 @Composable
-private fun ShelfScreen(
+internal fun ShelfScreen(
     items: List<ShadowItem>,
     store: ShadowStore,
     onTake: () -> Unit,
@@ -450,7 +465,7 @@ private fun ShadowCard(item: ShadowItem, store: ShadowStore, onClick: () -> Unit
 // ---------- 怖くする（抽出＋効果） ----------
 
 @Composable
-private fun ExtractScreen(
+internal fun ExtractScreen(
     source: Bitmap,
     initial: EditorInitial,
     sessionKey: Int,

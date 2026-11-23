@@ -16,5 +16,7 @@ fi
 # NOTE: gradle-8.14.3 forks a single-use daemon whose direct TCP is intercepted
 # by the runtime permission layer (other_tcp Deny) -> plugin resolution fails.
 # Gradle 8.9 runs the build without that problem. Keep 8.9 here.
-~/workspace/tools/gradle-8.9/bin/gradle "$@" \
+# ビルド直列化ルール（2026-11-23 全プロジェクト共通）：同時ビルドはVM全体で
+# 2本まで。共通ラッパー経由で実行し、空き枠を待ってから走らせる。
+exec ~/workspace/tools/with-build-lock.sh ~/workspace/tools/gradle-8.9/bin/gradle "$@" \
   -Dorg.gradle.daemon=false -Dkotlin.daemon.enabled=false --max-workers=1

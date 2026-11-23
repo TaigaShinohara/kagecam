@@ -8,10 +8,12 @@ class ShadowExtractorTest {
 
     @Test
     fun otsu_separatesDarkAndBrightClusters() {
-        // 半分が暗い影（40前後）、半分が明るい地面（200前後）
+        // 半分が暗い影（40〜46）、半分が明るい地面（194〜200）
         val lum = IntArray(1000) { i -> if (i % 2 == 0) 40 + (i % 7) else 200 - (i % 7) }
         val t = ShadowExtractor.otsuThreshold(lum)
-        assertTrue("threshold should sit between clusters, was $t", t in 60..180)
+        // 2つの山の間（46〜193）はどこも大津法の最適解として等価で、
+        // 実装はその最小値を返す。境目が山の外に出ていないことを確かめる
+        assertTrue("threshold should sit between clusters, was $t", t in 46..193)
     }
 
     @Test

@@ -115,7 +115,10 @@ object ShadowEffects {
         val out = IntArray(mask.size)
         val cy = (h - 1) / 2f
         for (y in 0 until h) {
-            val sy = ((y - cy) / stretch + cy).roundToInt().coerceIn(0, h - 1)
+            // 丸めは「偶数へ」（kotlin.math.round）：roundToInt（0.5切り上げ）だと
+            // 中心の上下で広がり方がずれ、引き伸ばしが非対称になるため
+            // （2026-11-23 の単体テスト初回実行で発覚し、テストの仕様どおりに修正）
+            val sy = kotlin.math.round(((y - cy) / stretch + cy).toDouble()).toInt().coerceIn(0, h - 1)
             for (x in 0 until w) {
                 out[y * w + x] = mask[sy * w + x]
             }
