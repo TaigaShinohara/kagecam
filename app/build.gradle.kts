@@ -1,9 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("io.github.takahirom.roborazzi")
 }
+
+// 署名鍵はプロジェクト専用のものを .local/ に置く（AGENTS.md のルール）。
+// 既定のデバッグ鍵はVM交換で消えて別鍵に化け、上書きインストール不可＋
+// データ消失を招くため使わない（v0.8.0 までがその状態だった）。
+val signingPropsFile = rootProject.file(".local/signing.properties")
+val signingProps = Properties().apply {
+    if (signingPropsFile.exists()) signingPropsFile.inputStream().use { load(it) }
+}
+val hasPersistentSigning = signingPropsFile.exists() &&
+    rootProject.file(".local/kagecam.keystore").exists()
 
 android {
     namespace = "app.kagecam"
@@ -18,9 +30,24 @@ android {
         versionName = "0.8.1"
     }
 
+    signingConfigs {
+        if (hasPersistentSigning) {
+            create("persistent") {
+                storeFile = rootProject.file(".local/kagecam.keystore")
+                storePassword = signingProps.getProperty("storePassword")
+                keyAlias = signingProps.getProperty("keyAlias")
+                keyPassword = signingProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            if (hasPersistentSigning) signingConfig = signingConfigs.getByName("persistent")
+        }
         release {
             isMinifyEnabled = false
+            if (hasPersistentSigning) signingConfig = signingConfigs.getByName("persistent")
         }
     }
     compileOptions {
