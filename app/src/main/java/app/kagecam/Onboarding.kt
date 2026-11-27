@@ -30,6 +30,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -626,10 +629,11 @@ private fun ObScaffold(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
             .then(tapModifier)
             .padding(horizontal = 24.dp),
     ) {
-        Spacer(Modifier.height(64.dp))
+        Spacer(Modifier.height(48.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -649,7 +653,7 @@ private fun ObScaffold(
             Text(sub, fontSize = 14.sp, color = Palette.Muted)
         }
         if (lower != null) lower()
-        Spacer(Modifier.height(76.dp))
+        Spacer(Modifier.height(56.dp))
     }
 }
 

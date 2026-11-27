@@ -26,6 +26,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -361,8 +364,14 @@ internal fun ShelfScreen(
     onOpen: (ShadowItem) -> Unit,
     onShowGuide: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Spacer(Modifier.height(28.dp))
+    // safeDrawing：ステータスバー／ジェスチャーバーに文字やボタンが潜らないようにする
+    // （v0.8.3。実機スクショで見出しが時計と重なっていた問題への対処）
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .padding(horizontal = 20.dp),
+    ) {
+        Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.Top) {
             Column(modifier = Modifier.weight(1f)) {
                 Text("KageCam", fontSize = 13.sp, color = Palette.Muted, fontWeight = FontWeight.Medium)
@@ -374,7 +383,7 @@ internal fun ShelfScreen(
                 )
             }
             TextButton(onClick = onShowGuide) {
-                Text("はじめかた", fontSize = 13.sp, color = Palette.Muted)
+                Text("はじめかた", fontSize = 14.sp, color = Palette.Muted)
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -426,12 +435,13 @@ private fun ShadowCard(item: ShadowItem, store: ShadowStore, onClick: () -> Unit
     LaunchedEffect(item.id) {
         bitmap = withContext(Dispatchers.IO) { store.loadBitmap(item, maxSize = 540) }
     }
+    // v0.8.3：絵はカードの幅いっぱいに切り取って見せる（Fit だと縦長写真が
+    // 小さく浮いて何の影か分からなかった。棚は「見分ける場所」なので Crop が正）
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Palette.Card)
-            .clickable { onClick() }
-            .padding(10.dp),
+            .clickable { onClick() },
     ) {
         Box(
             modifier = Modifier.fillMaxWidth().aspectRatio(1f),
@@ -442,21 +452,23 @@ private fun ShadowCard(item: ShadowItem, store: ShadowStore, onClick: () -> Unit
                 Image(
                     bitmap = bmp.asImageBitmap(),
                     contentDescription = "集めた影",
-                    contentScale = ContentScale.Fit,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+        ) {
             Text(
                 SimpleDateFormat("M月d日 HH:mm", Locale.JAPAN).format(Date(item.createdAt)),
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 color = Palette.Muted,
                 modifier = Modifier.weight(1f),
             )
             if (item.audioFileName != null) {
-                Text("音つき", fontSize = 11.sp, color = Palette.Muted)
+                Text("音つき", fontSize = 12.sp, color = Palette.Muted)
             }
         }
     }
@@ -621,8 +633,12 @@ internal fun ExtractScreen(
         if (!shown) shown = true
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Spacer(Modifier.height(28.dp))
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .padding(horizontal = 20.dp),
+    ) {
+        Spacer(Modifier.height(10.dp))
         Text("怖くする", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Palette.Ink)
         Text("気配だけが、残る", fontSize = 13.sp, color = Palette.Muted)
         Spacer(Modifier.height(14.dp))
@@ -661,7 +677,7 @@ internal fun ExtractScreen(
             TextButton(onClick = { showOriginal = !showOriginal }) {
                 Text(
                     if (showOriginal) "結果にもどす" else "元の写真と見比べる",
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     color = Palette.Muted,
                 )
             }
@@ -676,7 +692,7 @@ internal fun ExtractScreen(
                     label = { Text(p.label) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = Palette.Blood,
-                        selectedLabelColor = Color.White,
+                        selectedLabelColor = Palette.Bone,
                     ),
                 )
             }
@@ -846,8 +862,12 @@ private fun DetailScreen(
     }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Spacer(Modifier.height(20.dp))
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .padding(horizontal = 20.dp),
+    ) {
+        Spacer(Modifier.height(8.dp))
         TextButton(onClick = onBack) {
             Text("〈 棚にもどる", fontSize = 15.sp, color = Palette.Ink)
         }
