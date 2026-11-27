@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.provider.Settings
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -67,6 +68,50 @@ class ScreenshotTest {
             }
         }
         composeRule.onRoot().captureRoboImage(golden("shelf_empty"))
+    }
+
+    /** 棚（作品が1点ある状態）。v0.8.3 でカードの絵を幅いっぱい表示に変えた姿を固定する。 */
+    @Test
+    fun shelf_withItem() {
+        val app = RuntimeEnvironment.getApplication()
+        val store = ShadowStore(app)
+        // 日付表示が実行時刻で変わるとゴールデン照合が落ちるので、作成時刻を固定する
+        val fixedAt = java.util.Calendar.getInstance(
+            java.util.TimeZone.getTimeZone("Asia/Tokyo"),
+        ).apply { set(2026, java.util.Calendar.NOVEMBER, 15, 19, 44, 0) }.timeInMillis
+        store.add(
+            samplePhoto(),
+            null,
+            ShadowParams(
+                threshold = 128,
+                preset = "YUREI",
+                ghost = 0.4f,
+                stretch = 1.2f,
+                noise = 0.3f,
+            ),
+            null,
+            createdAt = fixedAt,
+        )
+        val items = store.loadAll()
+        composeRule.setContent {
+            KageCamTheme {
+                ShelfScreen(
+                    items = items,
+                    store = store,
+                    onTake = {},
+                    onPick = {},
+                    onOpen = {},
+                    onShowGuide = {},
+                )
+            }
+        }
+        // サムネイルは別スレッドで読み込まれるので、絵が出るまで待つ
+        composeRule.waitUntil(timeoutMillis = 20_000) {
+            composeRule.onAllNodesWithContentDescription("集めた影")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.waitForIdle()
+        composeRule.onRoot().captureRoboImage(golden("shelf_withItem"))
     }
 
     /** オンボーディングの入口（1ページ目＝フック）。 */

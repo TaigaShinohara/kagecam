@@ -99,8 +99,13 @@ class ShadowStore(context: Context) {
         }.getOrNull()
 
     /** 新規保存。完成画像と、再編集用に元画像＋パラメータを一緒にしまう。環境音があれば同封する。 */
-    fun add(bitmap: Bitmap, source: Bitmap?, params: ShadowParams, audioFile: File? = null): ShadowItem {
-        val createdAt = System.currentTimeMillis()
+    fun add(
+        bitmap: Bitmap,
+        source: Bitmap?,
+        params: ShadowParams,
+        audioFile: File? = null,
+        createdAt: Long = System.currentTimeMillis(),
+    ): ShadowItem {
         // 同じミリ秒に2件保存してもファイルが衝突しないよう、IDにランダムな尾を付ける
         val id = createdAt.toString() + "_" + UUID.randomUUID().toString().take(8)
         val fileName = "$id.png"
